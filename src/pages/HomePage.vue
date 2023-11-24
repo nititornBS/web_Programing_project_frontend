@@ -9,17 +9,19 @@
           <div class="text-center flex font">SMALL</div>
         </div>
 
-        <div
-          class="w-full h-[90%] grid grid-cols-2 gap-2 items-center justify-around"
-        >
-          <div
-            v-for="(val, property, index) in SmRoom"
-            :key="index"
-            class="flex justify-center"
-          >
-            <q-btn v-if="val != null " color="primary" icon="eco" class="grid-cols-2">
-              {{val}}</q-btn>
-            
+       <div class="w-full h-[90%] items-start justify-center">
+          <div class="h-full w-full ">
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                v-for="(val, property, index) in SmRoom"
+                :key="index"
+                class="flex justify-center"
+              >
+                <q-btn color="primary" icon="eco" class="grid-cols-2">{{
+                  val.RoomNumber
+                }}</q-btn>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -28,17 +30,19 @@
           <div class="text-center flex font">MEDIUM</div>
         </div>
 
-        <div
-          class="w-full h-[90%] grid grid-cols-2 gap-2 items-center justify-around"
-        >
-          <div
-            v-for="(val, property, index) in MdRoom"
-            :key="index"
-            class="flex justify-center"
-          >
-            <q-btn  color="primary" icon="eco" class="grid-cols-2">{{
-              val.RoomNumber
-            }}</q-btn>
+        <div class="w-full h-[90%] items-start justify-center">
+          <div class="h-full w-full ">
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                v-for="(val, property, index) in MdRoom"
+                :key="index"
+                class="flex justify-center"
+              >
+                <q-btn color="primary" icon="eco" class="grid-cols-2">{{
+                  val.RoomNumber
+                }}</q-btn>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -47,17 +51,19 @@
           <div class="text-center flex font">LARGE</div>
         </div>
 
-        <div
-          class="w-full h-[90%] grid grid-cols-2 gap-2 items-center justify-around"
-        >
-          <div
-            v-for="(val, property, index) in LgRoom"
-            :key="index"
-            class="flex justify-center"
-          >
-            <q-btn color="primary" icon="eco" class="grid-cols-2">{{
-              val.RoomNumber
-            }}</q-btn>
+        <div class="w-full h-[90%] items-start justify-center">
+          <div class="h-full w-full ">
+            <div class="grid grid-cols-2 gap-3">
+              <div
+                v-for="(val, property, index) in LgRoom"
+                :key="index"
+                class="flex justify-center"
+              >
+                <q-btn color="primary" icon="eco" class=" ">{{
+                  val.RoomNumber
+                }}</q-btn>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -303,38 +309,41 @@ export default defineComponent({
                 // Add other properties as needed
               };
             });
-            this.SmRoom = res.data.map((room) => {
+            res.data.map((room) => {
               if (room.SizeID === 1) {
-                return {
+                this.SmRoom.push({
                   RoomID: room.RoomID,
                   RoomNumber: room.RoomNumber,
                   SizeID: room.SizeID,
                   status: room.status,
-                };
+                });
+                return {};
               }
             });
             console.log("small rooms --> " + this.SmRoom);
             console.log(this.SmRoom);
-            this.MdRoom = res.data.map((room) => {
+            res.data.map((room) => {
               if (room.SizeID === 2) {
-                return {
+                this.MdRoom.push({
                   RoomID: room.RoomID,
                   RoomNumber: room.RoomNumber,
                   SizeID: room.SizeID,
                   status: room.status,
-                };
+                });
+                return {};
               }
             });
             console.log("medium rooms --> " + this.MdRoom);
 
-            this.LgRoom = res.data.map((room) => {
+            res.data.map((room) => {
               if (room.SizeID === 3) {
-                return {
+                this.LgRoom.push({
                   RoomID: room.RoomID,
                   RoomNumber: room.RoomNumber,
                   SizeID: room.SizeID,
                   status: room.status,
-                };
+                });
+                return {};
               }
             });
             console.log("Large rooms --> " + this.LgRoom);
