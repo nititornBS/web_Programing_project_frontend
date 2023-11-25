@@ -1,7 +1,28 @@
 <template>
   <q-page class="flex flex-col">
     <div class="flex justify-center items-center h-[20vh] w-full bg-gray-500">
-      <div class="bg-white h-[80%] w-[95%]"></div>
+      <div class="bg-white h-[80%] w-[95%]">
+        <div class="q-pa-md" style="max-width: 300px">
+          <q-input filled v-model="date" mask="date" :rules="['date']">
+            <template v-slot:append>
+              <q-icon name="event" class="cursor-pointer">
+                <q-popup-proxy
+                  cover
+                  transition-show="scale"
+                  transition-hide="scale"
+                >
+                  <q-date v-model="date">
+                    <div class="row items-center justify-end">
+                      <q-btn v-close-popup label="Close" color="primary" flat />
+                    </div>
+                  </q-date>
+                </q-popup-proxy>
+              </q-icon>
+            </template>
+          </q-input>
+        </div>
+        <q-datetime v-model="selectedDateTime" label="Select Date and Time" />
+      </div>
     </div>
     <div class="h-[70vh] flex justify-around">
       <div class="h-full w-[30%] flex flex-col">
@@ -9,15 +30,15 @@
           <div class="text-center flex font">SMALL</div>
         </div>
 
-       <div class="w-full h-[90%] items-start justify-center">
-          <div class="h-full w-full ">
-            <div class="grid grid-cols-2 gap-3">
+        <div class="w-full h-[90%] items-start justify-center">
+          <div class="h-full w-full">
+            <div class="grid grid-cols-2 gap-3 min-h-[15%] items-center w-full">
               <div
                 v-for="(val, property, index) in SmRoom"
                 :key="index"
-                class="flex justify-center"
+                class="flex justify-center h-full flex-col items-center"
               >
-                <q-btn color="primary" icon="eco" class="grid-cols-2">{{
+                <q-btn color="primary" class="w-[70%] text-2xl">{{
                   val.RoomNumber
                 }}</q-btn>
               </div>
@@ -31,7 +52,7 @@
         </div>
 
         <div class="w-full h-[90%] items-start justify-center">
-          <div class="h-full w-full ">
+          <div class="h-full w-full">
             <div class="grid grid-cols-2 gap-3">
               <div
                 v-for="(val, property, index) in MdRoom"
@@ -52,7 +73,7 @@
         </div>
 
         <div class="w-full h-[90%] items-start justify-center">
-          <div class="h-full w-full ">
+          <div class="h-full w-full">
             <div class="grid grid-cols-2 gap-3">
               <div
                 v-for="(val, property, index) in LgRoom"
@@ -212,9 +233,18 @@
 import { defineComponent } from "vue";
 import { useLoginUserStore } from "../stores/loginUserStrore";
 import { Notify } from "quasar";
+import { ref } from "vue";
 import DialogComponent from "src/components/DialogComponent.vue";
 export default defineComponent({
   name: "ListUserPage",
+  setup() {
+    const currentDate = new Date();
+    const formattedDate = ref(currentDate.toISOString()); // or currentDate.toDateString() or any other format
+    console.log(formattedDate);
+    return {
+      date: formattedDate,
+    };
+  },
   data() {
     return {
       dataReady: false,
@@ -223,7 +253,7 @@ export default defineComponent({
       SmRoom: [],
       MdRoom: [],
       LgRoom: [],
-
+      times: "",
       columns: [
         {
           name: "id",
