@@ -265,7 +265,7 @@ export default defineComponent({
     const currentDate = new Date();
     const formattedDate = ref(currentDate.toISOString()); // or currentDate.toDateString() or any other format
     console.log(formattedDate);
-
+const selectedDate = ref(formattedDate.value);
    
     return {
       date: formattedDate,
@@ -274,7 +274,7 @@ export default defineComponent({
   data() {
     return {
       dataReady: false,
-      nowtDate: "",
+    
       rows: [],
       rooms: [],
       SmRoom: [],
@@ -307,6 +307,7 @@ export default defineComponent({
       form_delete: false,
       currentTime:"",
       showDialog: false,
+       selectedDateTime: null,
       dialog: {
         icon: "",
         msg: "",
@@ -592,6 +593,7 @@ export default defineComponent({
 
     },
     navigateToBookRoom(val) {
+      console.log("this is date : " + this.date);
      const encodedVal = encodeURIComponent(JSON.stringify(val));
   this.$router.push({ name: 'bookroom', params: { val: encodedVal } });
   },

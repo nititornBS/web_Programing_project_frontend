@@ -11,7 +11,7 @@
             class="grid grid-cols-2 justify-center items-center p-5 h-[20%] w-full"
           >
             <div class="font-bold text-2xl h-full text-center">
-              <div>{{roomDetails.RoomNumber}}</div>
+              <div>{{ roomDetails.RoomNumber }}</div>
             </div>
             <div class="text-gray-500">Saturday, November 25, 2023</div>
           </div>
@@ -22,8 +22,6 @@
                 :key="index"
                 class="flex items-center justify-between p-2 cursor-pointer"
                 :class="{ ' bg-gray-400': index % 2 !== 0 }"
-                @click="selectTime(index)"
-                @dblclick="removeTime(index)"
               >
                 <div class="grid grid-cols-2 w-full">
                   <div
@@ -34,28 +32,36 @@
                     -------------
                     {{ timeID[index + 1].Time }}
                   </div>
-
-                  <div
-                    v-if="selectedTime[index]"
-                    class="flex justify-center items-center"
-                  >
-                    selected
+                  <div class="w-full">
+                    <q-btn
+                      v-if="selectedTime[index]"
+                      class="flex justify-center items-center"
+                      @click="removeTime(index)"
+                      label="selected"
+                  
+                    />
+                    <q-btn
+                      v-else
+                      class="flex justify-center items-center text-red-500"
+                      color="purple"
+                      label="booking"
+                      @click="selectTime(index)"
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div class=" p-4 h-[10%] items-center grid-cols-3 grid w-full ">
-            <div class="col-span-2">
-                ToTal {{ roomdata }}
-            
-            </div>
-            
-            
-            <div class=" justify-end flex ">
+          <div class="p-4 h-[10%] items-center grid-cols-3 grid w-full">
+            <div class="col-span-2">ToTal {{counthour()}} hour {{ counthour() * roomdata.CurrentPricePerHour }} </div>
+            <div>{{ roomdata }}</div>
 
-              <button class="bg-blue-500 text-white rounded-md px-4 py-2">
+            <div class="justify-end flex">
+              <button
+                class="bg-blue-500 text-white rounded-md px-4 py-2"
+                @click="showResave()"
+              >
                 Book Now
               </button>
             </div>
@@ -78,7 +84,11 @@ export default defineComponent({
       timeID: [],
       roomDetails: {},
       roomdata: {},
+      TotalPrice: 0,
       selectedTime: [],
+      starttime: null,
+      endtime: null,
+
       storeLogUser: useLoginUserStore(),
       dialog: {
         icon: "",
@@ -89,6 +99,21 @@ export default defineComponent({
     };
   },
   methods: {
+     showResave() {
+    
+        console.log("start Time " + this.starttime + "/// end time " + this.endtime);
+   
+  },
+    counthour() {
+      var count = 0;
+      this.selectedTime.map((times) => {
+        if (times!= null) {
+          count++
+        }
+      })
+      return count;
+    },
+
     getAlltime() {
       console.log("Get All Time ->> token:" + this.storeLogUser.accessToken);
       const headers = {
@@ -127,12 +152,10 @@ export default defineComponent({
         .then((res) => {
           if (res.status == 200) {
             res.data.map((timesObj) => {
-
               if (timesObj.SizeID == this.roomDetails.SizeID) {
-              this.roomdata = timesObj
-            }
+                this.roomdata = timesObj;
+              }
             });
-           
           }
         })
         .catch((err) => {
@@ -143,13 +166,61 @@ export default defineComponent({
           });
         });
     },
-    selectTime(index) {
-      this.selectedTime[index] = this.timeID[index].Time;
-    },
-    removeTime(index) {
-      this.selectedTime[index] = null;
-    },
+   selectTime(index) {
+  const selectedId = this.timeID[index].Id;
+
+  if (this.starttime === null && this.endtime === null) {
+    // If both starttime and endtime are null, set both to the selected time
+    this.starttime = selectedId;
+    this.endtime = selectedId;
+  } else {
+    // If either starttime or endtime is not null, adjust accordingly
+    if (selectedId < this.starttime) {
+      this.starttime = selectedId;
+    } else if (selectedId > this.endtime) {
+      this.endtime = selectedId;
+    }
+  }
+
+  // Store the selected time in the array
+  this.selectedTime[index] = selectedId;
+
+  console.log("start Time " + this.starttime + "/// end time " + this.endtime);
+},
+   removeTime(index) {
+  // Remove the selected time
+ var temp= this.selectedTime[index] ;
+ 
+     // Recalculate start and end times
+ if (this.starttime=== this.endtime) {
+   this.starttime = 0
+  this.endtime=0
+ } else {
+  
+   
+   
+   this.selectedTime.map((time) => {
+   console.log(time+"time");
+   if (time !== null) {
+     if (temp === this.starttime) {
+       this.starttime = temp + 1;
+      }
+      if (temp === this.endtime) {
+        this.endtime = temp - 1;
+      }
+    }
+  });
+}
+  
+  this.selectedTime[index] = null;
+  console.log("start Time " + this.starttime + "/// end time " + this.endtime);
+},
   },
+  calculateTotalPrice() {
+    this.TotalPrice =
+      this.selectedTime.length * this.roomdata.CurrentPricePerHour;
+  },
+ 
   async mounted() {
     await this.getAlltime();
     // Access the route params to get the object passed from the previous page
