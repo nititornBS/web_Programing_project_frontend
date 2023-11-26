@@ -40,6 +40,7 @@
                 class="flex justify-center h-full flex-col items-center"
               >
                 <q-btn color="primary" class="w-[70%] text-2xl"
+                 @click="navigateToBookRoom(val)"
                   >{{ val.RoomNumber }}
                   <div
                     v-if="isRoomNotAvailable(val.RoomNumber)"
@@ -68,6 +69,7 @@
                 class="flex justify-center h-full flex-col items-center"
               >
                 <q-btn color="primary" class="w-[70%] text-2xl"
+                 @click="navigateToBookRoom(val)"
                   >{{ val.RoomNumber }}
                   <div
                     v-if="isRoomNotAvailable(val.RoomNumber)"
@@ -96,6 +98,7 @@
                 class="flex justify-center h-full flex-col items-center"
               >
                 <q-btn color="primary" class="w-[70%] text-2xl"
+                 @click="navigateToBookRoom(val)"
                   >{{ val.RoomNumber }}
                   <div
                     v-if="isRoomNotAvailable(val.RoomNumber)"
@@ -262,7 +265,8 @@ export default defineComponent({
     const currentDate = new Date();
     const formattedDate = ref(currentDate.toISOString()); // or currentDate.toDateString() or any other format
     console.log(formattedDate);
-    this.nowtDate = formattedDate;
+
+   
     return {
       date: formattedDate,
     };
@@ -339,14 +343,16 @@ export default defineComponent({
             type: "negative",
             message: "Unauthorized",
           });
-          // this.storeLogUser.clearStorage();
-          // this.$router.push("/");
+
         });
     },
     getfreeroom() {
+       const currentDate = new Date();
+    const formattedDate = ref(currentDate.toISOString()); // or currentDate.toDateString() or any other format
+    
       const data = {
         CurrentTime: this.currentTime,
-        CurrentDate: this.currentdate,
+        CurrentDate: this.formattedDate
       };
       console.log("token:" + this.storeLogUser.accessToken);
       const headers = {
@@ -354,7 +360,7 @@ export default defineComponent({
       };
       console.log("headers:" + JSON.stringify(headers));
       this.$api
-        .get("/auth/", { headers })
+        .get("/auth/", { headers },data)
         .then((res) => {
           if (res.status == 200) {
             this.freeroom = res.data.map((user) => {
@@ -391,6 +397,7 @@ export default defineComponent({
                 Time: timesObj.Time,
               });
             });
+            
             console.log("show time " + this.timeID);
           }
         })
@@ -575,6 +582,7 @@ export default defineComponent({
         second: "2-digit",
         hour12: false, // Use 24-hour format
       };
+      
 
       const formattedTime = now.toLocaleString("en-US", options);
 
@@ -583,6 +591,10 @@ export default defineComponent({
       console.log(" current time ->>   "+ this.currentTime);
 
     },
+    navigateToBookRoom(val) {
+     const encodedVal = encodeURIComponent(JSON.stringify(val));
+  this.$router.push({ name: 'bookroom', params: { val: encodedVal } });
+  },
     submitEditData(filename) {
       let img = "";
       if (filename == null) {
