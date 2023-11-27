@@ -24,116 +24,25 @@
         <q-datetime v-model="selectedDateTime" label="Select Date and Time" />
       </div>
     </div>
-    <div class="h-[70vh] flex justify-around">
-      <div class="h-full w-[30%] flex flex-col">
-        <div class="w-full flex h-[10%] py-3 justify-center">
-          <div class="text-center flex font">SMALL</div>
-        </div>
 
-        <div class="w-full h-[90%] items-start justify-center">
-          <div class="h-full w-full">
-            <div class="grid grid-cols-2 gap-3 min-h-[15%] items-center w-full">
-              <div
-                v-for="(val, property, index) in SmRoom"
-                :key="index"
-                :color="isRoomNotAvailable(val.RoomNumber) ? 'red' : 'primary'"
-                class="flex justify-center h-full flex-col items-center"
-              >
-                <q-btn
-                  color="primary"
-                  class="w-[70%] text-2xl"
-                  @click="navigateToBookRoom(val)"
-                  >{{ val.RoomNumber }}
-                  <div
-                    v-if="isRoomNotAvailable(val.RoomNumber)"
-                    class="text-sm"
-                  >
-                    Non Available
-                  </div>
-                </q-btn>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="h-full w-[30%] flex flex-col">
-        <div class="w-full flex h-[10%] py-3 justify-center">
-          <div class="text-center flex font">SMALL</div>
-        </div>
-
-        <div class="w-full h-[90%] items-start justify-center">
-          <div class="h-full w-full">
-            <div class="grid grid-cols-2 gap-3 min-h-[15%] items-center w-full">
-              <div
-                v-for="(val, property, index) in MdRoom"
-                :key="index"
-                :color="isRoomNotAvailable(val.RoomNumber) ? 'red' : 'primary'"
-                class="flex justify-center h-full flex-col items-center"
-              >
-                <q-btn
-                  color="primary"
-                  class="w-[70%] text-2xl"
-                  @click="navigateToBookRoom(val)"
-                  >{{ val.RoomNumber }}
-                  <div
-                    v-if="isRoomNotAvailable(val.RoomNumber)"
-                    class="text-sm"
-                  >
-                    Non Available
-                  </div>
-                </q-btn>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="h-full w-[30%] flex flex-col">
-        <div class="w-full flex h-[10%] py-3 justify-center">
-          <div class="text-center flex font">SMALL</div>
-        </div>
-
-        <div class="w-full h-[90%] items-start justify-center">
-          <div class="h-full w-full">
-            <div class="grid grid-cols-2 gap-3 min-h-[15%] items-center w-full">
-              <div
-                v-for="(val, property, index) in LgRoom"
-                :key="index"
-                :color="isRoomNotAvailable(val.RoomNumber) ? 'red' : 'primary'"
-                class="flex justify-center h-full flex-col items-center"
-              >
-                <q-btn
-                  color="primary"
-                  class="w-[70%] text-2xl"
-                  @click="navigateToBookRoom(val)"
-                  >{{ val.RoomNumber }}
-                  <div
-                    v-if="isRoomNotAvailable(val.RoomNumber)"
-                    class="text-sm"
-                  >
-                    Non Available
-                  </div>
-                </q-btn>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
     <div style="width: 50%">Token: {{ this.storeLogUser.accessToken }}</div>
+
     <div v-if="dataReady">
       <!-- Data completed -->
       <q-table
         title="List of users"
         :columns="columns"
         :rows="rows"
-        row-key="id"
+        row-key="RoomID"
         :pagination="paginations"
       >
         <template #body="props">
           <q-tr :props="props">
-            <q-td key="id" :props="props"> {{ props.row.id }}</q-td>
-            <q-td key="fullname" :props="props"> {{ props.row.fullname }}</q-td>
-            <q-td key="email" :props="props"> {{ props.row.email }}</q-td>
+            <q-td key="RoomID" :props="props"> {{ props.row.RoomID }}</q-td>
+            <q-td key="RoomNumber" :props="props">
+              {{ props.row.RoomNumber }}</q-td
+            >
+            <q-td key="SizeID" :props="props"> {{ props.row.SizeID }}</q-td>
             <q-td key="action">
               <q-btn
                 color="primary"
@@ -169,42 +78,31 @@
       <q-card>
         <q-card-section class="row items-center">
           <q-avatar icon="delete" color="primary" text-color="white" />
-          <span class="q-ml-sm">Edit user ID: {{ input.id }}</span>
+          <span class="q-ml-sm">Edit Room Number: {{ input.RoomNumber }}</span>
         </q-card-section>
 
         <q-card-section>
           <div>
             <q-input
-              v-model="input.fullname"
+              v-model="input.RoomNumber"
               type="text"
-              label="Your Fullname"
+              label="Edit Number of ther room "
             />
           </div>
           <div>
-            <q-input v-model="input.email" type="text" label="Your Email" />
-          </div>
-          <div>
-            <q-img
-              v-if="input.img"
-              :src="input.img"
-              :ratio="4 / 3"
-              spinner-color="primary"
-              spinner-size="82px"
-            ></q-img>
-            <!-- file size = 1MB -->
-            <q-file
+            <q-select
+              v-model="input.SizeID"
+              :options="[1, 2, 3]"
+              label="Edit size of the room"
               outlined
-              label="Your avatar"
-              v-model="uploadFile"
-              accept=".jpg, .jpeg, .png"
-              max-file-size="1048576"
-              @rejected="onRejected"
-              @update:model-value="updateFile()"
-            >
-              <template v-slot:append>
-                <q-icon name="attach_file" />
-              </template>
-            </q-file>
+            />
+          </div>
+
+          <div class="text-gray-500 text-sm">
+            Size Id Note : <br />
+            1 = small size <br />
+            2 = medium <br />
+            3 = large
           </div>
         </q-card-section>
 
@@ -221,7 +119,7 @@
             label="Edit"
             color="primary"
             v-close-popup
-            @click="onEdit()"
+            @click="submitEditData()"
           />
         </q-card-actions>
       </q-card>
@@ -266,7 +164,7 @@ import { Notify } from "quasar";
 import { ref } from "vue";
 import DialogComponent from "src/components/DialogComponent.vue";
 export default defineComponent({
-  name: "ListUserPage",
+  name: "AdminHomepage",
   setup() {
   const currentDate = new Date();
   const formattedDate = ref(currentDate.toISOString().split('T')[0]); // Extracts the date part
@@ -295,17 +193,24 @@ export default defineComponent({
       freeroom: [],
       columns: [
         {
-          name: "id",
-          label: "id",
-          field: "id",
+          name: "RoomID",
+          label: "RoomID",
+          field: "RoomID",
           align: "center",
           sortable: true,
         },
         {
-          name: "fullname",
-          label: "fullname",
-          field: "fullname",
-          align: "left",
+          name: "RoomNumber",
+          label: "RoomNumber",
+          field: "RoomNumber",
+          align: "center",
+          sortable: true,
+        },
+        {
+          name: "SizeID",
+          label: "SizeID",
+          field: "SizeID",
+          align: "center",
           sortable: true,
         },
 
@@ -339,21 +244,21 @@ export default defineComponent({
         .get("/auth/", { headers })
         .then((res) => {
           if (res.status == 200) {
-            this.rows = res.data.map((user) => {
-              return {
-                id: user.UserID,
-                fullname: user.Name,
-                // Add other properties as needed
-              };
-            });
-            console.log("rows is " + this.rows);
+            // this.rows = res.data.map((user) => {
+            //   return {
+            //     id: user.UserID,
+            //     fullname: user.Name,
+            //     // Add other properties as needed
+            //   };
+            // });
+            // console.log("rows is " + this.rows);
           }
         })
         .catch((err) => {
           console.log(err);
           Notify.create({
             type: "negative",
-            message: "Unauthorized",
+            message: "cannot get user ",
           });
         });
     },
@@ -362,7 +267,6 @@ export default defineComponent({
       const formattedDate = ref(currentDate.toISOString()); // or currentDate.toDateString() or any other format
 
       const data = {
-        
         CurrentDate: this.date,
       };
       console.log("token:" + this.storeLogUser.accessToken);
@@ -432,53 +336,21 @@ export default defineComponent({
         .get("/admin/auth/allroom", { headers })
         .then((res) => {
           if (res.status == 200) {
-            this.rooms = res.data.map((room) => {
+            this.rows = res.data.map((rooms) => {
               return {
-                RoomID: room.RoomID,
-                RoomNumber: room.RoomNumber,
-                SizeID: room.SizeID,
-                status: room.status,
-
-                // Add other properties as needed
+                RoomID: rooms.RoomID,
+                RoomNumber: rooms.RoomNumber,
+                SizeID: rooms.SizeID,
               };
             });
-            res.data.map((room) => {
-              if (room.SizeID === 1) {
-                this.SmRoom.push({
-                  RoomID: room.RoomID,
-                  RoomNumber: room.RoomNumber,
-                  SizeID: room.SizeID,
-                  status: room.status,
-                });
-                return {};
-              }
-                   if (room.SizeID === 2) {
-                this.MdRoom.push({
-                  RoomID: room.RoomID,
-                  RoomNumber: room.RoomNumber,
-                  SizeID: room.SizeID,
-                  status: room.status,
-                });
-                return {};
-              }
-               if (room.SizeID === 3) {
-                this.LgRoom.push({
-                  RoomID: room.RoomID,
-                  RoomNumber: room.RoomNumber,
-                  SizeID: room.SizeID,
-                  status: room.status,
-                });
-                return {};
-              }
-            });
-           
+            console.log("now is all rows  ->>>" + this.rows);
           }
         })
         .catch((err) => {
           console.log(err);
           Notify.create({
             type: "negative",
-            message: "Unauthorized",
+            message: "cant get the room ",
           });
           // this.storeLogUser.clearStorage();
           // this.$router.push("/");
@@ -543,35 +415,7 @@ export default defineComponent({
     onCancelEdit() {
       this.getAllUsers();
     },
-    onEdit() {
-      // console.log("this is onEdit method");
-      if (this.uploadFile == "") this.uploadFile = null;
-      if (this.uploadFile) {
-        // upload new image
-        const headers = {
-          "Content-Type": "multipart/form-data",
-        };
-        const formData = new FormData();
-        formData.append("singlefile", this.uploadFile);
-        this.$api
-          .post("/file/upload", formData, { headers })
-          .then((response) => {
-            if (response.status == 200) {
-              // call user edit API
-              this.submitEditData(response.data.uploadFileName);
-              this.updateFile = null;
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            this.showErrDialog(err);
-          });
-      } else {
-        // NOT upload any images
-        this.submitEditData();
-      }
-      this.getAllUsers;
-    },
+    
     getFileName() {
       return filepath.substr(filepath.lastIndexOf("/") + 1);
     },
@@ -593,40 +437,28 @@ export default defineComponent({
     navigateToBookRoom(val) {
       console.log("this is date : " + this.date);
       const encodedVal = encodeURIComponent(JSON.stringify(val));
-      
+
       this.$router.push({ name: "bookroom", params: { val: encodedVal } });
     },
-    submitEditData(filename) {
-      let img = "";
-      if (filename == null) {
-        if (this.input.img == null) img = null;
-        else img = this.getFileName(this.input.img);
-      } else img = filename;
+    submitEditData() {
       const data = {
-        fullname: this.input.fullname,
-        email: this.input.email,
-        img: img,
+        roomnumber: this.input.RoomNumber,
+        sizeid: this.input.SizeID,
       };
       const headers = {
         "x-access-token": this.storeLogUser.accessToken,
       };
       this.$api
-        .put("/auth/" + this.input.id, data, { headers })
+        .put("/admin/auth/uproom/" + this.input.RoomID, data, { headers })
         .then((res) => {
           if (res.status == 200) {
             Notify.create({
               type: "positive",
-              message: "Updated user ID: " + res.data.id,
+              message: "Updated room " ,
             });
             if (this.storeLogUser.userid == res.data.id) {
               this.storeLogUser.fullname = res.data.fullname;
-              if (res.data.img != null && this.updateFile == null) {
-                this.storeLogUser.avatar =
-                  this.$RESTAPI + "/file/" + res.data.img;
-              } else {
-                this.storeLogUser.avatar = "default-avatar.png";
               }
-            }
           }
         })
         .catch((err) => {

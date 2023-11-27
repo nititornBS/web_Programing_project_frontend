@@ -92,7 +92,7 @@
 
             this.storeLogUser.fullname = res.data.Name;
             this.storeLogUser.accessToken = res.data.accessToken;
-            this.$router.push("/user");
+            this.$router.push("/admin");
             
           }
         })
