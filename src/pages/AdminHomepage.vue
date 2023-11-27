@@ -79,9 +79,9 @@
     <q-dialog v-model="form_edit" persistent>
       <q-card>
         <q-card-section class="row items-center gap-4 border border-black">
-          <div class=" text-2xl">{{ input.RoomNumber }}</div>
-         
-          <span class=" text-lg">Edit Room  </span>
+          <div class="text-2xl">{{ input.RoomNumber }}</div>
+
+          <span class="text-lg">Edit Room </span>
         </q-card-section>
 
         <q-card-section class="flex flex-col gap-4">
@@ -111,7 +111,7 @@
               outlined
             />
           </div>
-          <div class=" flex gap-7">
+          <div class="flex gap-7">
             <div class="text-gray-500 text-sm">
               Size Id Note : <br />
               1 = small size <br />
@@ -122,7 +122,6 @@
               Stetus Id Note : <br />
               N = Normal <br />
               D = Deleted <br />
-             
             </div>
           </div>
         </q-card-section>
@@ -476,6 +475,7 @@ export default defineComponent({
       const data = {
         roomnumber: this.input.RoomNumber,
         sizeid: this.input.SizeID,
+        status:this.input.status
       };
       const headers = {
         "x-access-token": this.storeLogUser.accessToken,

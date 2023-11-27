@@ -26,9 +26,9 @@
       </div>
     </div>
     <div class="h-[70vh] flex justify-around">
-      <div class="h-full w-[30%] flex flex-col">
+       <div class="h-full w-[30%] flex flex-col">
         <div class="w-full flex h-[10%] py-3 justify-center">
-          <div class="text-center flex font">SMALL</div>
+          <div class="text-center flex font">small</div>
         </div>
 
         <div class="w-full h-[90%] items-start justify-center">
@@ -37,26 +37,35 @@
               <div
                 v-for="(val, property, index) in SmRoom"
                 :key="index"
-                :color="isRoomNotAvailable(val.RoomID) ? 'red' : 'primary'"
                 class="flex justify-center h-full flex-col items-center"
               >
-                <q-btn
-                  color="primary"
-                  class="w-[70%] text-2xl"
-                  @click="navigateToBookRoom(val)"
-                  >{{ val.RoomNumber }}
-                  <div v-if="isRoomNotAvailable(val.RoomID)" class="text-sm">
-                    Non Available
+                <!-- Check if the room is not available -->
+                <template v-if="isRoomNotAvailable(val.RoomID)">
+                  <div
+                    class="non-available-room text-center bg-red-400 p-2 drop-shadow-xl border rounded-xl"
+                  >
+                    {{ val.RoomNumber }}
+                    <div class="text-sm">Non Available</div>
                   </div>
-                </q-btn>
+                </template>
+                <!-- If the room is available, show the button -->
+                <template v-else>
+                  <q-btn
+                    color="primary"
+                    class="w-[70%] text-2xl"
+                    @click="navigateToBookRoom(val)"
+                  >
+                    {{ val.RoomNumber }}
+                  </q-btn>
+                </template>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="h-full w-[30%] flex flex-col">
+ <div class="h-full w-[30%] flex flex-col">
         <div class="w-full flex h-[10%] py-3 justify-center">
-          <div class="text-center flex font">SMALL</div>
+          <div class="text-center flex font">Medium</div>
         </div>
 
         <div class="w-full h-[90%] items-start justify-center">
@@ -65,18 +74,27 @@
               <div
                 v-for="(val, property, index) in MdRoom"
                 :key="index"
-                :color="isRoomNotAvailable(val.RoomID) ? 'red' : 'primary'"
                 class="flex justify-center h-full flex-col items-center"
               >
-                <q-btn
-                  color="primary"
-                  class="w-[70%] text-2xl"
-                  @click="navigateToBookRoom(val)"
-                  >{{ val.RoomNumber }}
-                  <div v-if="isRoomNotAvailable(val.RoomID)" class="text-sm">
-                    Non Available
+                <!-- Check if the room is not available -->
+                <template v-if="isRoomNotAvailable(val.RoomID)">
+                  <div
+                    class="non-available-room text-center bg-red-400 p-2 drop-shadow-xl border rounded-xl"
+                  >
+                    {{ val.RoomNumber }}
+                    <div class="text-sm">Non Available</div>
                   </div>
-                </q-btn>
+                </template>
+                <!-- If the room is available, show the button -->
+                <template v-else>
+                  <q-btn
+                    color="primary"
+                    class="w-[70%] text-2xl"
+                    @click="navigateToBookRoom(val)"
+                  >
+                    {{ val.RoomNumber }}
+                  </q-btn>
+                </template>
               </div>
             </div>
           </div>
@@ -97,9 +115,11 @@
               >
                 <!-- Check if the room is not available -->
                 <template v-if="isRoomNotAvailable(val.RoomID)">
-                  <div class="non-available-room text-center bg-red-400 p-2 drop-shadow-xl border rounded-xl">
+                  <div
+                    class="non-available-room text-center bg-red-400 p-2 drop-shadow-xl border rounded-xl"
+                  >
                     {{ val.RoomNumber }}
-                    <div class="text-sm ">Non Available</div>
+                    <div class="text-sm">Non Available</div>
                   </div>
                 </template>
                 <!-- If the room is available, show the button -->
@@ -340,10 +360,10 @@ export default defineComponent({
       return false;
     },
 
-    async getHRoom() {
+    async getHRoom(dateinput) {
       try {
         const data = {
-          BookingDate: this.date,
+          BookingDate: dateinput,
         };
 
         const headers = {
@@ -645,7 +665,10 @@ export default defineComponent({
       const encodedVal = encodeURIComponent(JSON.stringify(val));
       const encodedeate = encodeURIComponent(JSON.stringify(this.date));
 
-      this.$router.push({ name: "bookroom", params: { val: encodedVal,date : encodedeate } });
+      this.$router.push({
+        name: "bookroom",
+        params: { val: encodedVal, date: encodedeate },
+      });
     },
     submitEditData(filename) {
       let img = "";
@@ -685,6 +708,13 @@ export default defineComponent({
           this.showErrDialog(err);
         });
     },
+    clearAllData() {
+      this.rooms = [];
+      this.SmRoom = [];
+      this.MdRoom = [];
+      this.LgRoom = [];
+      this.theroomFull = [];
+    },
   },
   async mounted() {
     await this.getAllUsers();
@@ -692,10 +722,23 @@ export default defineComponent({
     await this.getAlltime();
     await this.getfreeroom();
     await this.getCurrentTimeAndDate();
-    await this.getHRoom();
+    await this.getHRoom(this.date);
     console.log("token@mount:" + this.storeLogUser.accessToken);
     this.dataReady = true;
   },
   components: { DialogComponent },
+  watch: {
+    date(newDate, oldDate) {
+      // This function will be called whenever the 'date' property changes
+      // You can call your functions here to re-run them
+       this.clearAllData();
+      this.getHRoom(newDate);
+      this.getAllUsers();
+      this.getfreeroom();
+      this.getAlltime();
+      this.getAllRoom();
+      this.getCurrentTimeAndDate();
+    },
+  },
 });
 </script>

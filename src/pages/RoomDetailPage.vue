@@ -33,36 +33,39 @@
                     -------------
                     {{ timeID[index + 1].Time }}
                   </div>
-                  <div class="w-full">
+                  <div class="w-full flex justify-center">
                     <q-btn
-                      v-if="selectedTime[index]"
-                      class="flex justify-center items-center"
-                      @click="removeTime(index)"
-                      label="selected"
+                    v-if="selectedTime[index]"
+                    class="flex justify-center items-center"
+                    @click="removeTime(index)"
+                    label="selected"
                     />
                     <q-btn
-                      v-else
-                      class="flex justify-center items-center text-red-500"
-                      color="purple"
-                      label="booking"
-                      @click="selectTime(index)"
+                    v-else
+                    class="flex justify-center items-center text-red-500"
+                    color="purple"
+                    label="booking"
+                    @click="selectTime(index)"
                     />
                   </div>
                 </div>
               </div>
             </div>
+           <div v-for="booking in bookedTimes" :key="booking.Id">
+      {{ getTimeRangeForBooking(val.Id, timeID[index + 1].Id, booking) }}
+    </div>
           </div>
-
+          
           <div class="p-4 h-[10%] items-center grid-cols-3 grid w-full">
             <div class="col-span-2">
               ToTal {{ counthour() }} hour
               {{ counthour() * roomdata.CurrentPricePerHour }}
             </div>
-
+            
             <div class="justify-end flex">
               <button
-                class="bg-blue-500 text-white rounded-md px-4 py-2"
-                @click="showResave()"
+              class="bg-blue-500 text-white rounded-md px-4 py-2"
+                @click="editRecord()"
               >
                 Book Now
               </button>
@@ -72,13 +75,52 @@
       </div>
     </div>
   </q-page>
+
+  <q-dialog v-model="form_edit" persistent>
+    <q-card class="w-[20vw] h-[60vh]">
+      <q-card-section class="flex h-[90%]">
+        <div class="h-[30%] w-full text-center text-xl bg-blue-300">
+          <div class="text-3xl text-center font-bold">RECIPT</div>
+          <div class="text-xl text-center">Room number</div>
+          <div class="font-bold">{{ roomDetails.RoomNumber }}</div>
+          <div class="font-bold">{{ datenow }}</div>
+        </div>
+        <div class="h-[60%] w-full text-center text-xl">
+          <div>Price Per Hour</div>
+          <div class="font-bold">{{ roomdata.CurrentPricePerHour }}</div>
+          <div>TOTAL HOUR</div>
+          <div class="font-bold">{{ counthour() }}</div>
+          <div>TOTAL PRICE</div>
+          <div class="font-bold">
+            {{ counthour() * roomdata.CurrentPricePerHour }}
+          </div>
+          <div>Form</div>
+          <div class="font-bold">{{ timeID[starttime - 1].Time }}</div>
+          <div>To</div>
+          <div class="font-bold">{{ timeID[endtime].Time }}</div>
+        </div>
+      </q-card-section>
+
+      <q-card-actions align="right" class="h-[10%]">
+        <q-btn flat label="CANCLE" color="RED" v-close-popup />
+        <q-btn
+          flat
+          label="CONFIRM"
+          color="primary"
+          @click="showResave()"
+          v-close-popup
+        />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
+  <DialogComponent v-model="showDialog" :propDialog="dialog"></DialogComponent>
 </template>
 
 <script>
 import { defineComponent, ref } from "vue";
 import { useLoginUserStore } from "src/stores/loginUserStrore";
 import { Notify } from "quasar";
-
+import DialogComponent from "src/components/DialogcomponentBooking.vue";
 export default defineComponent({
   name: "RoomDetailPage",
   setup() {
@@ -100,6 +142,7 @@ export default defineComponent({
   data() {
     return {
       timeID: [],
+      form_edit: false,
       theroomFull: [],
       roomDetails: {},
       datenow: {},
@@ -109,6 +152,7 @@ export default defineComponent({
       starttime: 0,
       endtime: 0,
 
+      showDialog: false,
       storeLogUser: useLoginUserStore(),
       dialog: {
         icon: "",
@@ -119,15 +163,58 @@ export default defineComponent({
     };
   },
   methods: {
+     getTimeRangeForBooking(startTime, endTime, booking) {
+    // Format and display the time range for each booking
+    return `${this.timeID[startTime].Time} - ${this.timeID[endTime].Time} for Booking: ${booking.StartTime} - ${booking.EndTime}`;
+  },
+    isTimeBooked(index) {
+    // Check if the time range at the given index is booked
+    const startTime = this.timeID[index].Id;
+    const endTime = this.timeID[index + 1].Id;
+    return this.bookedTimes.some((booking) => {
+      return startTime >= booking.StartTime && endTime <= booking.EndTime;
+    });
+  },
+    editRecord() {
+      this.form_edit = true;
+    },
+    onDelete() { },
+    getbooked() {
+     
+      const data = {
+        RoomID: this.roomDetails.RoomID,
+        BookingDate: this.datenow,
+      };
+      const headers = {
+        "x-access-token": this.storeLogUser.accessToken,
+      };
+      this.$api
+        .put("/booking/getroomtime", data, { headers })
+        .then((res) => {
+          if (res.status == 200) {
+          
+          console.log(JSON.stringify(res.data))
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          this.showErrDialog(err);
+          Notify.create({
+            type: "negative",
+            message: "can not book ",
+          });
+        });
+    },
     showResave() {
+      this.$router.push("/user");
       const data = {
         RoomID: this.roomDetails.RoomID,
         UserID: this.storeLogUser.userid,
-        BookingDate: this.date,
+        BookingDate: this.datenow,
         StartTime: this.starttime,
-        EndTime: this.endtime,
-        TotalHour: (this.endtime - this.starttime +1),
-        TotalPrice: this.TotalPrice,
+        EndTime: this.endtime + 1,
+        TotalHour: 1 + this.endtime - this.starttime,
+        TotalPrice: this.counthour() * this.roomdata.CurrentPricePerHour,
       };
       const headers = {
         "x-access-token": this.storeLogUser.accessToken,
@@ -138,27 +225,25 @@ export default defineComponent({
           if (res.status == 200) {
             Notify.create({
               type: "positive",
-              message: "get data  ",
+              message: "Booking Sucessfuly",
             });
             console.log(res.data);
-          
           }
         })
         .catch((err) => {
           console.log(err);
           this.showErrDialog(err);
-           Notify.create({
+          Notify.create({
             type: "negative",
             message: "can not book ",
           });
         });
     },
     counthour() {
-      var count=0;
-      if (this.starttime!==0 && this.endtime !==0) {
-         count = this.endtime - this.starttime +1
-        
-      } 
+      var count = 0;
+      if (this.starttime !== 0 && this.endtime !== 0) {
+        count = this.endtime - this.starttime + 1;
+      }
       return count;
     },
 
@@ -265,6 +350,7 @@ export default defineComponent({
       );
     },
   },
+  components: { DialogComponent },
 
   async mounted() {
     await this.getAlltime();
@@ -272,7 +358,8 @@ export default defineComponent({
     this.roomDetails = JSON.parse(decodeURIComponent(this.$route.params.val));
     this.datenow = JSON.parse(decodeURIComponent(this.$route.params.date));
     await this.getRomdetail();
-  
+    await this.getbooked();
+
     console.log(this.roomDetails);
     console.log("Received room details:", this.roomDetails);
   },
