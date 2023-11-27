@@ -21,6 +21,7 @@
             </template>
           </q-input>
         </div>
+        <q-btn push color="primary" label="Push" @click="gotodashboard()" />
         <q-datetime v-model="selectedDateTime" label="Select Date and Time" />
       </div>
     </div>
@@ -43,6 +44,7 @@
               {{ props.row.RoomNumber }}</q-td
             >
             <q-td key="SizeID" :props="props"> {{ props.row.SizeID }}</q-td>
+            <q-td key="Status" :props="props"> {{ props.row.Status }}</q-td>
             <q-td key="action">
               <q-btn
                 color="primary"
@@ -76,12 +78,13 @@
     <!-- Edit Dialog -->
     <q-dialog v-model="form_edit" persistent>
       <q-card>
-        <q-card-section class="row items-center">
-          <q-avatar icon="delete" color="primary" text-color="white" />
-          <span class="q-ml-sm">Edit Room Number: {{ input.RoomNumber }}</span>
+        <q-card-section class="row items-center gap-4 border border-black">
+          <div class=" text-2xl">{{ input.RoomNumber }}</div>
+         
+          <span class=" text-lg">Edit Room  </span>
         </q-card-section>
 
-        <q-card-section>
+        <q-card-section class="flex flex-col gap-4">
           <div>
             <q-input
               v-model="input.RoomNumber"
@@ -97,12 +100,30 @@
               outlined
             />
           </div>
-
-          <div class="text-gray-500 text-sm">
-            Size Id Note : <br />
-            1 = small size <br />
-            2 = medium <br />
-            3 = large
+          <div>
+            <q-select
+              v-model="input.Status"
+              :options="[
+                { label: 'N', value: 'N' },
+                { label: 'D', value: 'D' },
+              ]"
+              label="Edit size of the room"
+              outlined
+            />
+          </div>
+          <div class=" flex gap-7">
+            <div class="text-gray-500 text-sm">
+              Size Id Note : <br />
+              1 = small size <br />
+              2 = medium <br />
+              3 = large
+            </div>
+            <div class="text-gray-500 text-sm">
+              Stetus Id Note : <br />
+              N = Normal <br />
+              D = Deleted <br />
+             
+            </div>
           </div>
         </q-card-section>
 
@@ -166,20 +187,20 @@ import DialogComponent from "src/components/DialogComponent.vue";
 export default defineComponent({
   name: "AdminHomepage",
   setup() {
-  const currentDate = new Date();
-  const formattedDate = ref(currentDate.toISOString().split('T')[0]); // Extracts the date part
-  console.log(formattedDate);
-  const selectedDate = ref({
-    day: currentDate.getDate(),
-    month: currentDate.getMonth() + 1,
-    year: currentDate.getFullYear(),
-  });
+    const currentDate = new Date();
+    const formattedDate = ref(currentDate.toISOString().split("T")[0]); // Extracts the date part
+    console.log(formattedDate);
+    const selectedDate = ref({
+      day: currentDate.getDate(),
+      month: currentDate.getMonth() + 1,
+      year: currentDate.getFullYear(),
+    });
 
-  return {
-    date: formattedDate,
-    selectedDate,
-  };
-},
+    return {
+      date: formattedDate,
+      selectedDate,
+    };
+  },
   data() {
     return {
       dataReady: false,
@@ -210,6 +231,13 @@ export default defineComponent({
           name: "SizeID",
           label: "SizeID",
           field: "SizeID",
+          align: "center",
+          sortable: true,
+        },
+        {
+          name: "Status",
+          label: "Status",
+          field: "Status",
           align: "center",
           sortable: true,
         },
@@ -261,6 +289,9 @@ export default defineComponent({
             message: "cannot get user ",
           });
         });
+    },
+    gotodashboard() {
+      this.$router.push("/DashBoard");
     },
     getfreeroom() {
       const currentDate = new Date();
@@ -341,6 +372,7 @@ export default defineComponent({
                 RoomID: rooms.RoomID,
                 RoomNumber: rooms.RoomNumber,
                 SizeID: rooms.SizeID,
+                Status: rooms.status,
               };
             });
             console.log("now is all rows  ->>>" + this.rows);
@@ -415,7 +447,7 @@ export default defineComponent({
     onCancelEdit() {
       this.getAllUsers();
     },
-    
+
     getFileName() {
       return filepath.substr(filepath.lastIndexOf("/") + 1);
     },
@@ -454,11 +486,11 @@ export default defineComponent({
           if (res.status == 200) {
             Notify.create({
               type: "positive",
-              message: "Updated room " ,
+              message: "Updated room ",
             });
             if (this.storeLogUser.userid == res.data.id) {
               this.storeLogUser.fullname = res.data.fullname;
-              }
+            }
           }
         })
         .catch((err) => {

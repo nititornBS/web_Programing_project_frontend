@@ -12,7 +12,7 @@
           >
             <div class="font-bold text-2xl h-full text-center">
               <div>{{ roomDetails.RoomNumber }}</div>
-              <div>{{ date }}</div>
+              <div>{{ datenow }}</div>
             </div>
             <div class="text-gray-500">Saturday, November 25, 2023</div>
           </div>
@@ -58,7 +58,6 @@
               ToTal {{ counthour() }} hour
               {{ counthour() * roomdata.CurrentPricePerHour }}
             </div>
-         
 
             <div class="justify-end flex">
               <button
@@ -82,26 +81,28 @@ import { Notify } from "quasar";
 
 export default defineComponent({
   name: "RoomDetailPage",
-setup() {
-  const currentDate = new Date();
-  const formattedDate = ref(currentDate.toISOString().split('T')[0]); // Extracts the date part
-  console.log(formattedDate);
-  const selectedDate = ref({
-    day: currentDate.getDate(),
-    month: currentDate.getMonth() + 1,
-    year: currentDate.getFullYear(),
-  });
+  setup() {
+    const currentDate = new Date();
+    const formattedDate = ref(currentDate.toISOString().split("T")[0]); // Extracts the date part
+    console.log(formattedDate);
+    const selectedDate = ref({
+      day: currentDate.getDate(),
+      month: currentDate.getMonth() + 1,
+      year: currentDate.getFullYear(),
+    });
 
-  return {
-    date: formattedDate,
-    selectedDate,
-  };
-},
+    return {
+      date: formattedDate,
+      selectedDate,
+    };
+  },
 
   data() {
     return {
       timeID: [],
+      theroomFull: [],
       roomDetails: {},
+      datenow: {},
       roomdata: {},
       TotalPrice: 0,
       selectedTime: [],
@@ -119,17 +120,45 @@ setup() {
   },
   methods: {
     showResave() {
-      console.log(
-        "start Time " + this.starttime + "/// end time " + this.endtime
-      );
+      const data = {
+        RoomID: this.roomDetails.RoomID,
+        UserID: this.storeLogUser.userid,
+        BookingDate: this.date,
+        StartTime: this.starttime,
+        EndTime: this.endtime,
+        TotalHour: (this.endtime - this.starttime +1),
+        TotalPrice: this.TotalPrice,
+      };
+      const headers = {
+        "x-access-token": this.storeLogUser.accessToken,
+      };
+      this.$api
+        .post("/booking/newbooking", data, { headers })
+        .then((res) => {
+          if (res.status == 200) {
+            Notify.create({
+              type: "positive",
+              message: "get data  ",
+            });
+            console.log(res.data);
+          
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+          this.showErrDialog(err);
+           Notify.create({
+            type: "negative",
+            message: "can not book ",
+          });
+        });
     },
     counthour() {
-      var count = 0;
-      this.selectedTime.map((times) => {
-        if (times != null) {
-          count++;
-        }
-      });
+      var count=0;
+      if (this.starttime!==0 && this.endtime !==0) {
+         count = this.endtime - this.starttime +1
+        
+      } 
       return count;
     },
 
@@ -236,16 +265,14 @@ setup() {
       );
     },
   },
-  calculateTotalPrice() {
-    this.TotalPrice =
-      this.selectedTime.length * this.roomdata.CurrentPricePerHour;
-  },
 
   async mounted() {
     await this.getAlltime();
     // Access the route params to get the object passed from the previous page
     this.roomDetails = JSON.parse(decodeURIComponent(this.$route.params.val));
+    this.datenow = JSON.parse(decodeURIComponent(this.$route.params.date));
     await this.getRomdetail();
+  
     console.log(this.roomDetails);
     console.log("Received room details:", this.roomDetails);
   },
